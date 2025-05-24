@@ -136,7 +136,8 @@ class MainWindow(QtWidgets.QMainWindow):
         exp_value = self.ui.Exp.value() / 20  # scale value
         enhancer = ImageEnhance.Brightness(self.original_image)
         modified = enhancer.enhance(2 ** exp_value)
-
+        
+        self.working_pil_image = modified
         self.original_pixmap = self.pil_image_to_pixmap(modified)
         self.update_display()
 
