@@ -11,7 +11,6 @@ from about import Ui_Dialog
 import res_rc
 
 
-
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -21,14 +20,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Exp.valueChanged.connect(self.slider_changed)
         self.ui.actionAbout.triggered.connect(self.show_about_dialog)
 
+        self.original_image = None 
+        self.working_pil_image = None 
         self.original_pixmap = None
-        self.original_pil_image = None
-        self.working_pil_image = None
+        self.enabled_cropping = False
         self.zoom_factor = 1.0
         self.min_zoom = 0.1
         self.max_zoom = 10.0
         self.zoom_step = 0.25
         self.ui.viewport.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.rubber_band = None
+        self.crop_origin = None
 
         panel1 = CollapsiblePanel("Color", self.ui.collapsible_1)
         panel2 = CollapsiblePanel("Contrast", self.ui.collapsible_2)
@@ -44,6 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.ui.actionOpen.triggered.connect(self.open_file)
+        self.ui.actionCrop.triggered.connect(self.crop_enable)
         self.ui.zoomInButton.clicked.connect(self.zoom_in)
         self.ui.zoomOutButton.clicked.connect(self.zoom_out)
         self.ui.pushButton.clicked.connect(self.open_color_picker)
@@ -55,6 +59,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def show_about_dialog(self):
         dialog = AboutDialog(self)
         dialog.exec_()
+
+    def crop_enable(self):
+        if self.enabled_cropping:
+            self.enabled_cropping = False
+        else:
+            self.enabled_cropping = True
 
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(
@@ -69,12 +79,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.original_pixmap = self.pil_image_to_pixmap(self.working_pil_image)
             self.zoom_factor = 1.0
             self.update_display()
-            self.update_exp() 
+            self.update_exp()
             self.ui.statusbar.showMessage(f"Opened: {filename}")
             
 
     def pil_image_to_pixmap(self, pil_image):
         """Convert a Pillow Image to QPixmap using bytes buffer"""
+        if pil_image is None:
+            return QtGui.QPixmap()
+        if pil_image.mode not in ['RGB', 'RGBA']:
+            pil_image = pil_image.convert('RGBA')
+        elif pil_image.mode == 'RGB':
+             pil_image = pil_image.convert('RGBA')
+
+
         buffer = io.BytesIO()
         pil_image.save(buffer, format="PNG")
         pixmap = QtGui.QPixmap()
@@ -106,8 +124,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.original_pixmap = self.pil_image_to_pixmap(self.working_pil_image)
         self.update_display()
 
+
     def slider_changed(self):
-        if self.working_pil_image:
+        if self.original_image: # Zmiana, aby odnosić się do original_image jako bazy
             self.update_exp()
 
     def update_exp(self):
@@ -118,9 +137,9 @@ class MainWindow(QtWidgets.QMainWindow):
         enhancer = ImageEnhance.Brightness(self.original_image)
         modified = enhancer.enhance(2 ** exp_value)
 
-        self.working_pil_image = modified
         self.original_pixmap = self.pil_image_to_pixmap(modified)
         self.update_display()
+
 
     def zoom_in(self):
         self.zoom_factor = min(self.zoom_factor + self.zoom_step, self.max_zoom)
@@ -131,10 +150,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_display()
 
     def update_display(self):
-        if self.original_pixmap:
+        if self.original_pixmap and not self.original_pixmap.isNull():
             scaled_size = self.original_pixmap.size() * self.zoom_factor
             scaled_pixmap = self.original_pixmap.scaled(
-                scaled_size, 
+                scaled_size,
                 QtCore.Qt.KeepAspectRatio,
                 QtCore.Qt.SmoothTransformation
             )
@@ -147,6 +166,99 @@ class MainWindow(QtWidgets.QMainWindow):
         shadow.setYOffset(y_offset)
         shadow.setColor(color)
         widget.setGraphicsEffect(shadow)
+
+    # image crop
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
+        if self.working_pil_image is not None and event.button() == QtCore.Qt.LeftButton and self.enabled_cropping:
+            self.rect_moved = False
+            pos_in_viewport = self.ui.viewport.mapFrom(self, event.pos())
+            if self.ui.viewport.rect().contains(pos_in_viewport):
+                if self.ui.viewport.pixmap() and not self.ui.viewport.pixmap().isNull():
+                    self.crop_origin = pos_in_viewport
+                    if not self.rubber_band:
+                        self.rubber_band = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self.ui.viewport)
+                    self.rubber_band.setGeometry(QtCore.QRect(self.crop_origin, QtCore.QSize()))
+                    self.rubber_band.show()
+                    event.accept()
+                    return
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent):
+        if self.crop_origin and self.rubber_band and self.enabled_cropping:
+            self.rect_moved = True
+            current_pos_in_viewport = self.ui.viewport.mapFrom(self, event.pos())
+            self.rubber_band.setGeometry(QtCore.QRect(self.crop_origin, current_pos_in_viewport).normalized())
+            event.accept()
+            return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event: QtGui.QMouseEvent):
+        if self.enabled_cropping:
+            if self.crop_origin and self.rubber_band and self.rect_moved and event.button() == QtCore.Qt.LeftButton:
+                end_pos_in_viewport = self.ui.viewport.mapFrom(self, event.pos())
+                selection_rect_vp_coords = QtCore.QRect(self.crop_origin, end_pos_in_viewport).normalized()
+                self.rect_moved = False
+                selection_rect_vp_coords = selection_rect_vp_coords.intersected(self.ui.viewport.rect())
+                self.rubber_band.hide()
+                current_display_pixmap = self.ui.viewport.pixmap()
+                if self.working_pil_image and \
+                   current_display_pixmap and not current_display_pixmap.isNull() and \
+                   selection_rect_vp_coords.isValid() and \
+                   selection_rect_vp_coords.width() > 0 and selection_rect_vp_coords.height() > 0:
+
+                    spw = current_display_pixmap.width()
+                    sph = current_display_pixmap.height()
+
+                    offset_x = (self.ui.viewport.width() - spw) / 2
+                    offset_y = (self.ui.viewport.height() - sph) / 2
+
+                    crop_x_on_scaled_pm = selection_rect_vp_coords.x() - offset_x
+                    crop_y_on_scaled_pm = selection_rect_vp_coords.y() - offset_y
+                    crop_w_on_scaled_pm = selection_rect_vp_coords.width()
+                    crop_h_on_scaled_pm = selection_rect_vp_coords.height()
+
+                    crop_x_on_scaled_pm = max(0, crop_x_on_scaled_pm)
+                    crop_y_on_scaled_pm = max(0, crop_y_on_scaled_pm)
+
+                    if crop_x_on_scaled_pm >= spw or crop_y_on_scaled_pm >= sph: 
+                        self.crop_origin = None
+                        event.accept()
+                        return
+
+                    crop_w_on_scaled_pm = min(crop_w_on_scaled_pm, spw - crop_x_on_scaled_pm)
+                    crop_h_on_scaled_pm = min(crop_h_on_scaled_pm, sph - crop_y_on_scaled_pm)
+
+                    if crop_w_on_scaled_pm > 0 and crop_h_on_scaled_pm > 0:
+                        pil_crop_x1 = int(crop_x_on_scaled_pm / self.zoom_factor)
+                        pil_crop_y1 = int(crop_y_on_scaled_pm / self.zoom_factor)
+                        pil_crop_w = int(crop_w_on_scaled_pm / self.zoom_factor)
+                        pil_crop_h = int(crop_h_on_scaled_pm / self.zoom_factor)
+
+                        pil_crop_x2 = pil_crop_x1 + pil_crop_w
+                        pil_crop_y2 = pil_crop_y1 + pil_crop_h
+
+                        final_crop_box = (
+                            max(0, pil_crop_x1),
+                            max(0, pil_crop_y1),
+                            min(self.working_pil_image.width, pil_crop_x2),
+                            min(self.working_pil_image.height, pil_crop_y2)
+                        )
+                        if final_crop_box[2] > final_crop_box[0] and final_crop_box[3] > final_crop_box[1]:
+                            try:
+                                cropped_pil = self.working_pil_image.crop(final_crop_box)
+                                self.working_pil_image = cropped_pil
+                                self.original_pixmap = self.pil_image_to_pixmap(self.working_pil_image) 
+                                self.update_display()
+                            except Exception as e:
+                                print(f"Błąd przycinania: {e}")
+                self.crop_origin = None
+                event.accept()
+                return
+            if self.rubber_band:
+                 self.rubber_band.hide()
+            self.crop_origin = None
+            super().mouseReleaseEvent(event)
+
 
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
@@ -214,7 +326,7 @@ class CollapsiblePanel(QtWidgets.QWidget):
         self.toggle_animation.setEndValue(end_value)
         self.toggle_animation.start()
 
-
+       
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
