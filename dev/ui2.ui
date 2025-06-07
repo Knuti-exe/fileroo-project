@@ -23,8 +23,30 @@
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
-      <item alignment="Qt::AlignHCenter">
-       <widget class="QLabel" name="viewport">
+      <item>
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+       <widget class="QScrollArea" name="scrollArea_viewport">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -33,15 +55,84 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>900</width>
-          <height>800</height>
+          <width>100</width>
+          <height>122</height>
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: white; border: 1px solid gray;</string>
+         <string notr="true">background-color: white </string>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents_viewport">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>64</width>
+           <height>64</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_viewport">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="imageLabel">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="zoomLabel">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: grey; padding: 1px;</string>
         </property>
         <property name="text">
-         <string/>
+         <string>100%</string>
         </property>
        </widget>
       </item>
@@ -64,27 +155,20 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="zoomInButton">
+         <widget class="QSlider" name="zoomSlider">
           <property name="styleSheet">
-           <string notr="true"> background-color: #5a5a5a;</string>
+           <string notr="true">background-color: grey; padding: 1px</string>
           </property>
-          <property name="text">
-           <string>+</string>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QWidget" name="widget_2" native="true"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="zoomOutButton">
-          <property name="styleSheet">
-           <string notr="true"> background-color: #5a5a5a;</string>
-          </property>
-          <property name="text">
-           <string>-</string>
-          </property>
-         </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer_2">
@@ -102,28 +186,27 @@
        </layout>
       </item>
       <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QWidget" name="widget" native="true"/>
       </item>
      </layout>
     </item>
-    <item>
+    <item alignment="Qt::AlignTop">
      <widget class="QScrollArea" name="scrollArea">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>150</width>
+        <height>400</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
-        <width>200</width>
+        <width>300</width>
         <height>1400</height>
        </size>
       </property>
@@ -138,21 +221,24 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>198</width>
-         <height>545</height>
+         <width>148</width>
+         <height>398</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item alignment="Qt::AlignTop">
+        <item>
          <widget class="QWidget" name="collapsible_1" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #4C4C4C;</string>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
+           <item alignment="Qt::AlignTop">
             <widget class="QPushButton" name="pushButton">
              <property name="text">
               <string>Color</string>
@@ -170,8 +256,11 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #4C4C4C;</string>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
+           <item alignment="Qt::AlignTop">
             <widget class="QSlider" name="Exp">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -204,11 +293,14 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionCrop"/>
    </widget>
    <widget class="QMenu" name="menuImage">
     <property name="title">
@@ -263,7 +355,7 @@
     <string>toolBar</string>
    </property>
    <property name="styleSheet">
-    <string notr="true">margin: 20px; padding: 3px; background-color: #5a5a5a; shadow: red </string>
+    <string notr="true">margin: 20px; padding: 3px; background-color: #5a5a5a </string>
    </property>
    <property name="movable">
     <bool>false</bool>
@@ -291,7 +383,7 @@
   <action name="actionSelectTool">
    <property name="icon">
     <iconset>
-     <normaloff>../fileroo-project/Ikony_inż/4.png</normaloff>../fileroo-project/Ikony_inż/4.png</iconset>
+     <normaloff>../Ikony_inż/4.png</normaloff>../Ikony_inż/4.png</iconset>
    </property>
    <property name="text">
     <string>SelectTool</string>
@@ -305,7 +397,7 @@
   <action name="actionCursorTool">
    <property name="icon">
     <iconset>
-     <normaloff>../fileroo-project/Ikony_inż/1.png</normaloff>../fileroo-project/Ikony_inż/1.png</iconset>
+     <normaloff>../Ikony_inż/1.png</normaloff>../Ikony_inż/1.png</iconset>
    </property>
    <property name="text">
     <string>CursorTool</string>
@@ -314,7 +406,7 @@
   <action name="actionPencilTool">
    <property name="icon">
     <iconset>
-     <normaloff>../fileroo-project/Ikony_inż/2.png</normaloff>../fileroo-project/Ikony_inż/2.png</iconset>
+     <normaloff>../Ikony_inż/2.png</normaloff>../Ikony_inż/2.png</iconset>
    </property>
    <property name="text">
     <string>PencilTool</string>
@@ -323,7 +415,7 @@
   <action name="actionMagnGlassTool">
    <property name="icon">
     <iconset>
-     <normaloff>../fileroo-project/Ikony_inż/3.png</normaloff>../fileroo-project/Ikony_inż/3.png</iconset>
+     <normaloff>../Ikony_inż/3.png</normaloff>../Ikony_inż/3.png</iconset>
    </property>
    <property name="text">
     <string>MagnGlassTool</string>
@@ -332,7 +424,7 @@
   <action name="actionTextTool">
    <property name="icon">
     <iconset>
-     <normaloff>../fileroo-project/Ikony_inż/5.png</normaloff>../fileroo-project/Ikony_inż/5.png</iconset>
+     <normaloff>../Ikony_inż/5.png</normaloff>../Ikony_inż/5.png</iconset>
    </property>
    <property name="text">
     <string>TextTool</string>
@@ -341,6 +433,21 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionCrop">
+   <property name="text">
+    <string>Crop</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
    </property>
   </action>
  </widget>
