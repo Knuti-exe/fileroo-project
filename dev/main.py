@@ -4,7 +4,8 @@ from PyQt5.QtGui import QIcon, QImage, QPixmap
 from PyQt5.QtCore import QSize, QBuffer
 from PyQt5.QtWidgets import QFileDialog, QColorDialog, QDialog, QLabel
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
-from PIL import Image, ImageEnhance, ImageChops, ImageQt
+from PyQt5.QtWidgets import QMessageBox
+from PIL import Image, ImageEnhance, ImageChops, ImageQt, ImageFilter
 from ui2 import Ui_MainWindow
 from about import Ui_Dialog
 
@@ -25,6 +26,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.original_image = None
         self.working_pil_image = None
         self.original_pixmap = None
+        self.unsaved_img = None
+        self.current_file_path = None
         self.enabled_cropping = False
         self.zoom_factor = 1.0
         self.min_zoom = 0.1
@@ -44,33 +47,56 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.imageLabel = self.ui.scrollArea_viewport.findChild(QLabel, "imageLabel")
         self.ui.imageLabel.setAlignment(QtCore.Qt.AlignCenter)
 
-
-
         self.ui.scrollArea_viewport.setAlignment(QtCore.Qt.AlignCenter)
-        self.ui.scrollArea_viewport.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.ui.scrollArea_viewport.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.ui.scrollArea_viewport.setHorizontalScrollBarPolicy(
+            QtCore.Qt.ScrollBarAlwaysOff
+        )
+        self.ui.scrollArea_viewport.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarAlwaysOff
+        )
 
     def setup_connections(self):
         # Menu actions
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionCrop.triggered.connect(self.toggle_cropping)
         self.ui.actionAbout.triggered.connect(self.show_about_dialog)
-        self.ui.actionColor_picker.triggered.connect(self.open_color_picker)
         self.ui.actionUndo.triggered.connect(self.undo)
         self.ui.actionRedo.triggered.connect(self.redo)
-
+        self.ui.actionSave.triggered.connect(self.save_image)
+        self.ui.actionSave_as.triggered.connect(self.save_image_as)
         # Zoom slider
         # self.ui.zoomInButton.clicked.connect(self.zoom_in)
         # self.ui.zoomOutButton.clicked.connect(self.zoom_out)
         self.ui.zoomSlider.valueChanged.connect(self.zoom)
 
-        # Right toolbar
-        self.ui.pushButton.clicked.connect(self.open_color_picker)
-        self.ui.Exp.valueChanged.connect(self.update_exposure)
+        # Right toolbar---------------------------------------------------------------------
+        # Color
+        self.ui.r_slider.valueChanged.connect(self.update_full_image)
+        self.ui.g_slider.valueChanged.connect(self.update_full_image)
+        self.ui.b_slider.valueChanged.connect(self.update_full_image)
+        
+        self.ui.reset_color_button.clicked.connect(self.reset_colors)
+        
+        # Enhancements
+        self.ui.brightness_slider.valueChanged.connect(self.update_full_image)
+        self.ui.contrast_slider.valueChanged.connect(self.update_full_image)
+        self.ui.sharpness_slider.valueChanged.connect(self.update_full_image)
+        self.ui.saturation_slider.valueChanged.connect(self.update_full_image)
+
+        self.ui.reset_enhance_button.clicked.connect(self.reset_enhancements)
+        # Img filters
+        self.ui.actionBlur.toggled.connect(self.update_full_image)
+        self.ui.actionContour.toggled.connect(self.update_full_image)
+        self.ui.actionDetail.toggled.connect(self.update_full_image)
+        self.ui.actionEdge_Enhance.toggled.connect(self.update_full_image)
+        self.ui.actionSharpen.toggled.connect(self.update_full_image)
+        self.ui.actionEmboss.toggled.connect(self.update_full_image)
+        self.ui.actionFind_Edhes.toggled.connect(self.update_full_image)
+        self.ui.actionSmooth.toggled.connect(self.update_full_image)
 
         # Event filters
         self.ui.scrollArea_viewport.viewport().installEventFilter(self)
-
+        #-----------------------------------------------------------------------------------
     def setup_collapsible_panels(self):
         layout = self.ui.verticalLayout_2
         for i in reversed(range(layout.count())):
@@ -80,7 +106,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.panels = [
             CollapsiblePanel("Color", self.ui.collapsible_1),
-            CollapsiblePanel("Contrast", self.ui.collapsible_2)
+            CollapsiblePanel("Enhancements", self.ui.collapsible_2),
         ]
 
         for panel in self.panels:
@@ -94,67 +120,137 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # ================ Image Operations =================
     def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(
+        file_path, _ = QFileDialog.getOpenFileName(
             self, "Open File", "", "Image Files (*.png *.jpg *.jpeg *.bmp)"
         )
-        if not filename:
+        if not file_path:
             return
 
-        self.original_image = Image.open(filename).convert("RGB")
+        self.original_image = Image.open(file_path)
+        self.current_file_path = file_path  # 🔹 зберігаємо шлях
+        self.base_image = self.original_image.copy()
         self.working_pil_image = self.original_image.copy()
         self.original_pixmap = self.pil_image_to_pixmap(self.working_pil_image)
         self.zoom_factor = 1.0
         self.update_display()
-        self.update_exposure()
-        self.ui.statusbar.showMessage(f"Opened: {filename}")
+        self.ui.statusbar.showMessage(f"Opened: {file_path}")
 
     def pil_image_to_pixmap(self, pil_image):
         if not pil_image:
             return QtGui.QPixmap()
 
-        if pil_image.mode not in ['RGB', 'RGBA']:
-            pil_image = pil_image.convert('RGBA')
-        elif pil_image.mode == 'RGB':
-            pil_image = pil_image.convert('RGBA')
+        if pil_image.mode != "RGBA":
+            pil_image = pil_image.convert("RGBA")
+
 
         buffer = io.BytesIO()
         pil_image.save(buffer, format="PNG")
         pixmap = QtGui.QPixmap()
         pixmap.loadFromData(buffer.getvalue())
         return pixmap
-        
-    def open_color_picker(self):
-        color = QColorDialog.getColor()
-        if color.isValid():
-            self.apply_color(color)
-        
-    def apply_color(self, color):
-        if not self.working_pil_image:
+
+
+
+    def update_full_image(self):
+        if not hasattr(self, 'base_image') or self.base_image is None:
             return
 
-        r, g, b, _ = color.getRgb()
-        img = self.working_pil_image.convert('RGB') if self.working_pil_image.mode != 'RGB' else self.working_pil_image.copy()
+        image = self.base_image.convert("RGB")
 
-        tint = Image.new('RGB', img.size, (r, g, b))
-        tinted = ImageChops.multiply(img, tint)
+        # ---------- Colors ----------
+        red_factor = self.ui.r_slider.value() / 100
+        green_factor = self.ui.g_slider.value() / 100
+        blue_factor = self.ui.b_slider.value() / 100
 
-        self.push_undo_state()
-        self.working_pil_image = tinted
-        self.original_pixmap = self.pil_image_to_pixmap(tinted)
+        r, g, b = image.split()
+        r = r.point(lambda i: max(0, min(255, int(i * red_factor))))
+        g = g.point(lambda i: max(0, min(255, int(i * green_factor))))
+        b = b.point(lambda i: max(0, min(255, int(i * blue_factor))))
+        image = Image.merge("RGB", (r, g, b))
+
+        # ---------- Enchancements ----------
+        brightness_value = self.ui.brightness_slider.value() / 20
+        contrast_value = self.ui.contrast_slider.value() / 20
+        sharpness_value = self.ui.sharpness_slider.value() / 20
+        saturation_value = self.ui.saturation_slider.value() / 20
+
+        image = ImageEnhance.Brightness(image).enhance(2 ** brightness_value)
+        image = ImageEnhance.Contrast(image).enhance(3 ** contrast_value)
+        image = ImageEnhance.Sharpness(image).enhance(3 ** sharpness_value)
+        image = ImageEnhance.Color(image).enhance(3 ** saturation_value)
+
+        # ---------- filters ----------
+        filter_map = {
+            self.ui.actionBlur: ImageFilter.BLUR,
+            self.ui.actionContour: ImageFilter.CONTOUR,
+            self.ui.actionDetail: ImageFilter.DETAIL,
+            self.ui.actionEdge_Enhance: ImageFilter.EDGE_ENHANCE,
+            self.ui.actionSharpen: ImageFilter.SHARPEN,
+            self.ui.actionEmboss: ImageFilter.EMBOSS,
+            self.ui.actionFind_Edhes: ImageFilter.FIND_EDGES,
+            self.ui.actionSmooth: ImageFilter.SMOOTH,
+        }
+
+        for action, pil_filter in filter_map.items():
+            if action.isChecked():
+                image = image.filter(pil_filter)
+
+        # ---------- Img reload ----------
+        self.working_pil_image = image.copy()
+        self.original_pixmap = self.pil_image_to_pixmap(image)
         self.update_display()
 
-    def update_exposure(self):
-        if not self.original_image:
+
+
+    def reset_enhancements(self):
+        self.ui.brightness_slider.setValue(0)
+        self.ui.contrast_slider.setValue(0)
+        self.ui.sharpness_slider.setValue(0)
+        self.ui.saturation_slider.setValue(0)
+
+        try:
+            self.current_image = self.original_image.copy()
+            self.update_display()
+
+        except Exception as e:
+            print(f"Error: {e}")
             return
 
-        exp_value = self.ui.Exp.value() / 20
-        enhancer = ImageEnhance.Brightness(self.original_image)
-        modified = enhancer.enhance(2 ** exp_value)
+    def reset_colors(self):
+        self.ui.r_slider.setValue(100)
+        self.ui.g_slider.setValue(100)
+        self.ui.b_slider.setValue(100)
 
-        self.push_undo_state()
-        self.working_pil_image = modified
-        self.original_pixmap = self.pil_image_to_pixmap(modified)
-        self.update_display()
+        try:
+            self.current_image = self.original_image.copy()
+            self.update_display()
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return
+        
+    def save_image(self):
+        if not self.current_file_path:
+            self.save_image_as()
+            return
+
+        try:
+            self.working_pil_image.save(self.current_file_path)
+            QMessageBox.information(self, "Saved", "Image saved successfully.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to save image:\n{e}")
+
+    def save_image_as(self):
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save Image As", "", "Images (*.png *.jpg *.bmp)")
+        if not file_path:
+            return
+
+        try:
+            self.working_pil_image.save(file_path)
+            self.current_file_path = file_path  # оновлюємо шлях
+            QMessageBox.information(self, "Saved As", "Image saved successfully.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to save image:\n{e}")
 
     # def zoom_in(self):
     #     self.zoom_factor = min(self.zoom_factor + self.zoom_step, self.max_zoom)
@@ -163,6 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # def zoom_out(self):
     #     self.zoom_factor = max(self.zoom_factor - self.zoom_step, self.min_zoom)
     #     self.update_display()
+
     def zoom(self, value):
         self.zoom_factor = value / 100.0
 
@@ -174,6 +271,7 @@ class MainWindow(QtWidgets.QMainWindow):
         percent = int(self.zoom_factor * 100)
         self.ui.zoomLabel.setText(f"{percent}%")
         self.update_display()
+
     # ================ Undo/Redo Operations =================
     def push_undo_state(self):
         if not self.working_pil_image:
@@ -205,9 +303,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         scaled_size = self.original_pixmap.size() * self.zoom_factor
         scaled_pixmap = self.original_pixmap.scaled(
-            scaled_size,
-            QtCore.Qt.KeepAspectRatio,
-            QtCore.Qt.SmoothTransformation
+            scaled_size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
         )
 
         self.ui.imageLabel.setPixmap(scaled_pixmap)
@@ -217,12 +313,18 @@ class MainWindow(QtWidgets.QMainWindow):
         # Set scroll area size
         self.ui.scrollArea_viewport.setMinimumSize(
             min(scaled_size.width(), self.max_viewport_size.width()),
-            min(scaled_size.height(), self.max_viewport_size.height())
+            min(scaled_size.height(), self.max_viewport_size.height()),
         )
         self.ui.scrollArea_viewport.setMaximumSize(self.max_viewport_size)
-    
 
-    def add_shadow(self, widget, blur_radius=15, x_offset=5, y_offset=5, color=QtGui.QColor(0, 0, 0, 160)):
+    def add_shadow(
+        self,
+        widget,
+        blur_radius=15,
+        x_offset=5,
+        y_offset=5,
+        color=QtGui.QColor(0, 0, 0, 160),
+    ):
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(blur_radius)
         shadow.setXOffset(x_offset)
@@ -235,24 +337,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.enabled_cropping = not self.enabled_cropping
 
     def mousePressEvent(self, event: QtGui.QMouseEvent):
-        if (self.working_pil_image and
-            event.button() == QtCore.Qt.LeftButton and
-            self.enabled_cropping):
+        if (
+            self.working_pil_image
+            and event.button() == QtCore.Qt.LeftButton
+            and self.enabled_cropping
+        ):
 
             self.rect_moved = False
             pos_in_viewport = self.ui.imageLabel.mapFrom(self, event.pos())
 
-            if (self.ui.imageLabel.rect().contains(pos_in_viewport) and
-                self.ui.imageLabel.pixmap() and
-                not self.ui.imageLabel.pixmap().isNull()):
+            if (
+                self.ui.imageLabel.rect().contains(pos_in_viewport)
+                and self.ui.imageLabel.pixmap()
+                and not self.ui.imageLabel.pixmap().isNull()
+            ):
 
                 self.crop_origin = pos_in_viewport
                 if not self.rubber_band:
                     self.rubber_band = QtWidgets.QRubberBand(
-                        QtWidgets.QRubberBand.Rectangle,
-                        self.ui.imageLabel
+                        QtWidgets.QRubberBand.Rectangle, self.ui.imageLabel
                     )
-                self.rubber_band.setGeometry(QtCore.QRect(self.crop_origin, QtCore.QSize()))
+                self.rubber_band.setGeometry(
+                    QtCore.QRect(self.crop_origin, QtCore.QSize())
+                )
                 self.rubber_band.show()
                 event.accept()
                 return
@@ -263,32 +370,42 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.crop_origin and self.rubber_band and self.enabled_cropping:
             self.rect_moved = True
             current_pos_in_viewport = self.ui.imageLabel.mapFrom(self, event.pos())
-            self.rubber_band.setGeometry(QtCore.QRect(self.crop_origin, current_pos_in_viewport).normalized())
+            self.rubber_band.setGeometry(
+                QtCore.QRect(self.crop_origin, current_pos_in_viewport).normalized()
+            )
             event.accept()
             return
 
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent):
-        if (self.enabled_cropping and
-            self.crop_origin and
-            self.rubber_band and
-            self.rect_moved and
-            event.button() == QtCore.Qt.LeftButton):
+        if (
+            self.enabled_cropping
+            and self.crop_origin
+            and self.rubber_band
+            and self.rect_moved
+            and event.button() == QtCore.Qt.LeftButton
+        ):
 
             end_pos_in_viewport = self.ui.imageLabel.mapFrom(self, event.pos())
-            selection_rect_vp_coords = QtCore.QRect(self.crop_origin, end_pos_in_viewport).normalized()
+            selection_rect_vp_coords = QtCore.QRect(
+                self.crop_origin, end_pos_in_viewport
+            ).normalized()
             self.rect_moved = False
-            selection_rect_vp_coords = selection_rect_vp_coords.intersected(self.ui.imageLabel.rect())
+            selection_rect_vp_coords = selection_rect_vp_coords.intersected(
+                self.ui.imageLabel.rect()
+            )
             self.rubber_band.hide()
 
             current_display_pixmap = self.ui.imageLabel.pixmap()
-            if (self.working_pil_image and
-                current_display_pixmap and
-                not current_display_pixmap.isNull() and
-                selection_rect_vp_coords.isValid() and
-                selection_rect_vp_coords.width() > 0 and
-                selection_rect_vp_coords.height() > 0):
+            if (
+                self.working_pil_image
+                and current_display_pixmap
+                and not current_display_pixmap.isNull()
+                and selection_rect_vp_coords.isValid()
+                and selection_rect_vp_coords.width() > 0
+                and selection_rect_vp_coords.height() > 0
+            ):
 
                 self.process_crop(selection_rect_vp_coords, current_display_pixmap)
 
@@ -365,12 +482,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return super().eventFilter(source, event)
 
-
     def show_about_dialog(self):
         dialog = AboutDialog(self)
         dialog.exec_()
 
     # ================ About window =================
+
+
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -384,12 +502,17 @@ class CollapsiblePanel(QtWidgets.QWidget):
     def __init__(self, title: str, content: QtWidgets.QWidget, parent=None):
         super().__init__(parent)
 
-        self.toggle_button = QtWidgets.QToolButton(text=title, checkable=True, checked=False)
+        self.toggle_button = QtWidgets.QToolButton(
+            text=title, checkable=True, checked=False
+        )
         self.toggle_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self.toggle_button.setArrowType(QtCore.Qt.RightArrow)
-        self.toggle_button.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.toggle_button.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
         self.toggle_button.clicked.connect(self.toggle)
-        self.toggle_button.setStyleSheet("""
+        self.toggle_button.setStyleSheet(
+            """
             QToolButton {
                 background-color: #444;
                 color: white;
@@ -402,17 +525,22 @@ class CollapsiblePanel(QtWidgets.QWidget):
                 background-color: #666;
             }
             QToolButton::menu-indicator { image: none; }
-        """)
+        """
+        )
 
         self.content_area = QtWidgets.QScrollArea()
         self.content_area.setMaximumHeight(0)
-        self.content_area.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.content_area.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
         self.content_area.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.content_area.setStyleSheet("background-color: #666;")
         self.content_area.setWidgetResizable(True)
         self.content_area.setWidget(content)
 
-        self.toggle_animation = QtCore.QPropertyAnimation(self.content_area, b"maximumHeight")
+        self.toggle_animation = QtCore.QPropertyAnimation(
+            self.content_area, b"maximumHeight"
+        )
         self.toggle_animation.setDuration(200)
         self.toggle_animation.setEasingCurve(QtCore.QEasingCurve.OutCubic)
 
@@ -429,18 +557,28 @@ class CollapsiblePanel(QtWidgets.QWidget):
 
     def toggle(self):
         checked = self.toggle_button.isChecked()
-        self.toggle_button.setArrowType(QtCore.Qt.DownArrow if checked else QtCore.Qt.RightArrow)
+        self.toggle_button.setArrowType(
+            QtCore.Qt.DownArrow if checked else QtCore.Qt.RightArrow
+        )
         content_height = self.content_area.widget().sizeHint().height()
         self.toggle_animation.setStartValue(self.content_area.maximumHeight())
         self.toggle_animation.setEndValue(content_height if checked else 0)
         self.toggle_animation.start()
 
         if checked:
-            self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
-            self.content_area.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+            self.setSizePolicy(
+                QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding
+            )
+            self.content_area.setSizePolicy(
+                QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding
+            )
         else:
-            self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
-            self.content_area.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            self.setSizePolicy(
+                QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum
+            )
+            self.content_area.setSizePolicy(
+                QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
+            )
 
 
 if __name__ == "__main__":

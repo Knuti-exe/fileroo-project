@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>909</width>
-    <height>609</height>
+    <width>1003</width>
+    <height>675</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,8 +76,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>64</width>
-           <height>64</height>
+           <width>72</width>
+           <height>72</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_viewport">
@@ -132,7 +132,7 @@
          <string notr="true">background-color: grey; padding: 1px;</string>
         </property>
         <property name="text">
-         <string>100%</string>
+         <string>50%</string>
         </property>
        </widget>
       </item>
@@ -161,6 +161,9 @@
           </property>
           <property name="maximum">
            <number>100</number>
+          </property>
+          <property name="sliderPosition">
+           <number>50</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -220,9 +223,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
-         <width>148</width>
-         <height>398</height>
+         <y>-5</y>
+         <width>130</width>
+         <height>437</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -238,10 +241,70 @@
            <string notr="true">background-color: #4C4C4C;</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item alignment="Qt::AlignTop">
-            <widget class="QPushButton" name="pushButton">
+           <item>
+            <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Color</string>
+              <string>Red</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="r_slider">
+             <property name="maximum">
+              <number>200</number>
+             </property>
+             <property name="sliderPosition">
+              <number>100</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Green</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="g_slider">
+             <property name="maximum">
+              <number>200</number>
+             </property>
+             <property name="sliderPosition">
+              <number>100</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Blue</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="b_slider">
+             <property name="maximum">
+              <number>200</number>
+             </property>
+             <property name="sliderPosition">
+              <number>100</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="reset_color_button">
+             <property name="text">
+              <string>Reset</string>
              </property>
             </widget>
            </item>
@@ -260,10 +323,90 @@
            <string notr="true">background-color: #4C4C4C;</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item alignment="Qt::AlignTop">
-            <widget class="QSlider" name="Exp">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Brighness</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="brightness_slider">
+             <property name="minimum">
+              <number>-30</number>
+             </property>
+             <property name="maximum">
+              <number>31</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Contrast</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="contrast_slider">
+             <property name="minimum">
+              <number>-30</number>
+             </property>
+             <property name="maximum">
+              <number>31</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Sharpness</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="sharpness_slider">
+             <property name="minimum">
+              <number>-40</number>
+             </property>
+             <property name="maximum">
+              <number>41</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Saturation</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="saturation_slider">
+             <property name="minimum">
+              <number>-40</number>
+             </property>
+             <property name="maximum">
+              <number>41</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="reset_enhance_button">
+             <property name="text">
+              <string>Reset</string>
              </property>
             </widget>
            </item>
@@ -281,7 +424,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>909</width>
+     <width>1003</width>
      <height>23</height>
     </rect>
    </property>
@@ -293,6 +436,9 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_as"/>
+    <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
    </widget>
@@ -311,7 +457,14 @@
     <property name="title">
      <string>Filter</string>
     </property>
-    <addaction name="actionColor_picker"/>
+    <addaction name="actionBlur"/>
+    <addaction name="actionContour"/>
+    <addaction name="actionDetail"/>
+    <addaction name="actionEdge_Enhance"/>
+    <addaction name="actionSharpen"/>
+    <addaction name="actionEmboss"/>
+    <addaction name="actionFind_Edhes"/>
+    <addaction name="actionSmooth"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -389,9 +542,12 @@
     <string>SelectTool</string>
    </property>
   </action>
-  <action name="actionColor_picker">
+  <action name="actionBlur">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Color picker</string>
+    <string>Blur</string>
    </property>
   </action>
   <action name="actionCursorTool">
@@ -448,6 +604,72 @@
   <action name="actionRedo">
    <property name="text">
     <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionContour">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Contour</string>
+   </property>
+  </action>
+  <action name="actionDetail">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Detail</string>
+   </property>
+  </action>
+  <action name="actionEdge_Enhance">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Edge Enhance</string>
+   </property>
+  </action>
+  <action name="actionSharpen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sharpen</string>
+   </property>
+  </action>
+  <action name="actionEmboss">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Emboss</string>
+   </property>
+  </action>
+  <action name="actionFind_Edhes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Find_Edhes</string>
+   </property>
+  </action>
+  <action name="actionSmooth">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Smooth</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSave_as">
+   <property name="text">
+    <string>Save as</string>
    </property>
   </action>
  </widget>
