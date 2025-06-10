@@ -285,8 +285,6 @@ class MainWindow(QtWidgets.QMainWindow):
         msg_box.setWindowTitle(title)
         msg_box.setText(message)
         msg_box.setIcon(QMessageBox.Information)
-
-        # Styl czcionki
         msg_box.setStyleSheet("color: #dddddd;")
 
         msg_box.exec_()
@@ -352,12 +350,6 @@ class MainWindow(QtWidgets.QMainWindow):
     #     self.zoom_factor = max(self.zoom_factor - self.zoom_step, self.min_zoom)
     #     self.update_display()
 
-    # main.py, dodaj tę nową metodę do klasy MainWindow
-
- 
-
-        
-
     def set_tool(self, tool_name):
         print(tool_name)
         if self.current_tool != tool_name:
@@ -371,7 +363,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if not self.working_pil_image:
             return
 
-        # Pobierz współrzędne na obrazie
         coords = self._get_image_coords(pos_in_label)
         if not coords:
             return
@@ -437,10 +428,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.statusbar.showMessage("Nothing to undo")
             return
 
-        # Przenieś aktualny stan do redo
         self.redo_stack.append(self.base_image.copy())
-        
-        # Przywróć poprzedni stan z undo
         self.base_image = self.undo_stack.pop()
         
         self.update_full_image()
@@ -451,10 +439,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.statusbar.showMessage("Nothing to redo")
             return
             
-        # Przenieś aktualny stan do undo
-        self.undo_stack.append(self.base_image.copy())
-        
-        # Przywróć stan z redo
+        self.undo_stack.append(self.base_image.copy())        
         self.base_image = self.redo_stack.pop()
 
         self.update_full_image()
@@ -495,7 +480,7 @@ class MainWindow(QtWidgets.QMainWindow):
         shadow.setColor(color)
         widget.setGraphicsEffect(shadow)
 
-    # ================ Crop and text ================= #TODO undo nie działa
+    # ================ Crop and text =================
 
     def mousePressEvent(self, event: QtGui.QMouseEvent):
         pos_in_viewport = self.ui.imageLabel.mapFrom(self, event.pos())
