@@ -66,6 +66,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionRotate.triggered.connect(self.rotate_img)
         self.ui.actionResize.triggered.connect(self.resize_img)
         self.ui.actionMirror.triggered.connect(self.mirror_img)
+        
         self.ui.actionAbout.triggered.connect(self.show_about_dialog)
         self.ui.actionUndo.triggered.connect(self.undo)
         self.ui.actionRedo.triggered.connect(self.redo)
@@ -227,6 +228,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.current_image = self.original_image.copy()
             self.update_display()
+            self.ui.statusbar.showMessage("Enchancements reseted")
 
         except Exception as e:
             print(f"Error: {e}")
@@ -240,6 +242,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.current_image = self.original_image.copy()
             self.update_display()
+            self.ui.statusbar.showMessage("Colors reseted")
 
         except Exception as e:
             print(f"Error: {e}")
@@ -252,6 +255,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.push_undo_state()
             self.base_image = self.base_image.rotate(-angle, expand=True)
             self.update_full_image()
+            self.ui.statusbar.showMessage(f"Image rotated: {angle}")
 
     def input_dialog(self, type, title, text, decimals=1, min=0, max=360, val=0, items=None):
         dialog = QInputDialog(self)
@@ -307,21 +311,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.update_full_image()
 
     def mirror_img(self):
-        mode, ok = self.input_dialog(None, "Mirror Image", "Choose mirror direction:", 
-                                     items=["Horizontal", "Vertical", "Both"])
-        if not ok:
+        if not self.base_image:
             return
-        self.push_undo_state()
-        if mode == "Horizontal":
-            new_image = ImageOps.mirror(self.base_image)
-        elif mode == "Vertical":
-            new_image = ImageOps.flip(self.base_image)
-        else:  # Both
-            new_image = ImageOps.mirror(self.base_image)
-            new_image = ImageOps.flip(new_image)
 
-        self.base_image = new_image
+        self.push_undo_state()
+        self.base_image = ImageOps.mirror(self.base_image)
         self.update_full_image()
+        self.ui.statusbar.showMessage("Image mirrored horizontally")
+
 
 
     def save_image(self):
