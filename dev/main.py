@@ -1,4 +1,4 @@
-import sys, io
+import sys, io, time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QTransform
 from PyQt5.QtCore import QSize, QBuffer, Qt
@@ -9,6 +9,7 @@ from PIL import Image, ImageEnhance, ImageChops, ImageQt, ImageFilter, ImageOps,
 import PIL.ImageQt as ImageQt
 from ui2 import Ui_MainWindow
 from about import Ui_Dialog
+import res
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -139,6 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.working_pil_image = self.original_image.copy()
         self.original_pixmap = self.pil_image_to_pixmap(self.working_pil_image)
         self.zoom_factor = 1.0
+        self.ui.choosefileLabel.setParent(None) # usuń tekst "Choose File"
         self.update_display()
         self.ui.statusbar.showMessage(f"Opened: {file_path}")
 
@@ -293,6 +295,7 @@ class MainWindow(QtWidgets.QMainWindow):
         factor, ok = self.input_dialog(QInputDialog.DoubleInput, "Resize Image", "Resize factor (e.g. 2 = half size):", 
                           2, 0.1, 1000, 1.0)
         if ok:
+            self.push_undo_state()
             old_size = self.base_image.size
             new_size = (int(old_size[0] / factor), int(old_size[1] / factor))
 
@@ -401,6 +404,8 @@ class MainWindow(QtWidgets.QMainWindow):
         return (img_x, img_y)
 
     def zoom(self, value):
+        if not self.original_pixmap or self.original_pixmap.isNull():
+            return
         max_height, max_width = self.size().height() * 0.8, self.size().width() * 0.8
         vertical_ratio = max_height / self.original_pixmap.height()
         horizontal_ratio = max_width / self.original_pixmap.width()
@@ -747,6 +752,13 @@ class CollapsiblePanel(QtWidgets.QWidget):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
+
+    splash_pix = QtGui.QPixmap(":/newPrefix/Ikony_inż/icon100.png")
+    splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash.show()
+    time.sleep(2) 
+    splash.close() 
+
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())

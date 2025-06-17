@@ -1,0 +1,29 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>Ikony_inż/1.png</file>
+    <file>Ikony_inż/1_white.png</file>
+    <file>Ikony_inż/2.png</file>
+    <file>Ikony_inż/2_white.png</file>
+    <file>Ikony_inż/3.png</file>
+    <file>Ikony_inż/3_white.png</file>
+    <file>Ikony_inż/4.png</file>
+    <file>Ikony_inż/4_test.png</file>
+    <file>Ikony_inż/4_white.png</file>
+    <file>Ikony_inż/5.png</file>
+    <file>Ikony_inż/5_white.png</file>
+    <file>Ikony_inż/6.png</file>
+    <file>Ikony_inż/6_white.png</file>
+    <file>Ikony_inż/7.png</file>
+    <file>Ikony_inż/7 — kopia.png</file>
+    <file>Ikony_inż/7_white.png</file>
+    <file>Ikony_inż/7_white — kopia.png</file>
+    <file>Ikony_inż/arrow.png</file>
+    <file>Ikony_inż/icon.png</file>
+    <file>Ikony_inż/icon34.png</file>
+    <file>Ikony_inż/icon100.png</file>
+    <file>Ikony_inż/img_icon.png</file>
+    <file>Ikony_inż/minus.png</file>
+    <file>Ikony_inż/plus.png</file>
+    <file>Ikony_inż/splash.png</file>
+  </qresource>
+</RCC>

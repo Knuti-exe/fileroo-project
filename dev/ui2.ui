@@ -6,19 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1003</width>
-    <height>675</height>
+    <width>866</width>
+    <height>612</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: #292929;</string>
+   <string notr="true">background-color: #292929; color: white</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true"/>
+    <string notr="true">QScrollBar {
+	border: none;
+	background: rgb(75, 75, 75);
+	width: 14px;
+	margin: 15px 0 15px 0;
+	border-radius: 0px;
+}
+</string>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
@@ -35,6 +42,19 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="choosefileLabel">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Choose image via File -&amp;gt; Open &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
       <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
        <widget class="QScrollArea" name="scrollArea_viewport">
@@ -60,7 +80,7 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: white </string>
+         <string notr="true">border: 0px;</string>
         </property>
         <property name="lineWidth">
          <number>0</number>
@@ -76,8 +96,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>72</width>
-           <height>72</height>
+           <width>28</width>
+           <height>53</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_viewport">
@@ -157,7 +177,7 @@
         <item>
          <widget class="QSlider" name="zoomSlider">
           <property name="styleSheet">
-           <string notr="true">background-color: grey; padding: 1px</string>
+           <string notr="true">background-color: grey; padding: px; </string>
           </property>
           <property name="maximum">
            <number>100</number>
@@ -204,7 +224,7 @@
       <property name="minimumSize">
        <size>
         <width>150</width>
-        <height>400</height>
+        <height>550</height>
        </size>
       </property>
       <property name="maximumSize">
@@ -224,8 +244,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>130</width>
-         <height>437</height>
+         <width>148</width>
+         <height>548</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -424,7 +444,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1003</width>
+     <width>866</width>
      <height>23</height>
     </rect>
    </property>
@@ -451,11 +471,6 @@
     <addaction name="actionResize"/>
     <addaction name="actionMirror"/>
    </widget>
-   <widget class="QMenu" name="menuImage">
-    <property name="title">
-     <string>Image</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuFilter">
     <property name="title">
      <string>Filter</string>
@@ -469,11 +484,6 @@
     <addaction name="actionFind_Edhes"/>
     <addaction name="actionSmooth"/>
    </widget>
-   <widget class="QMenu" name="menuWindow">
-    <property name="title">
-     <string>Window</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
@@ -482,55 +492,10 @@
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuImage"/>
    <addaction name="menuFilter"/>
-   <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>100</width>
-     <height>400</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>400</height>
-    </size>
-   </property>
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">margin: 20px; padding: 3px; background-color: #5a5a5a </string>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionCursorTool"/>
-   <addaction name="actionSelectTool"/>
-   <addaction name="actionPencilTool"/>
-   <addaction name="actionMagnGlassTool"/>
-   <addaction name="actionTextTool"/>
-  </widget>
   <action name="actionOpen">
    <property name="text">
     <string>Open</string>
