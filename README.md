@@ -1,4 +1,4 @@
-# 📷 Filtroo — Simple Image Editor
+# Filtroo — Simple Image Editor
 
 Filtroo is a university group project developed as part of a Software Engineering course. The goal was to go through all key stages of the software development lifecycle:
 
@@ -11,7 +11,7 @@ Filtroo is a university group project developed as part of a Software Engineerin
 
 ---
 
-## 🧩 Project Overview
+## Project Overview
 
 Filtroo is a lightweight photo editor that provides essential tools for basic image manipulation. Key features include:
 
@@ -24,7 +24,7 @@ Filtroo is a lightweight photo editor that provides essential tools for basic im
 
 ---
 
-## 💻 Tech Stack
+## Tech Stack
 
 The project is written in Python and uses the following libraries and tools:
 
@@ -34,7 +34,7 @@ The project is written in Python and uses the following libraries and tools:
 
 ---
 
-## 🚀 Launching the App
+## Launching the App
 
 The compiled application can be launched via:
 
