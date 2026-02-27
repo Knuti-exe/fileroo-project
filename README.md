@@ -1,5 +1,11 @@
 # Filtroo — Simple Image Editor
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![GUI](https://img.shields.io/badge/GUI-PyQt5-green)
+![Image Processing](https://img.shields.io/badge/Image%20Processing-Pillow-orange)
+![Packaging](https://img.shields.io/badge/Packaging-Exe%20Build-blueviolet)  
+
+
 Filtroo is a university group project developed as part of a Software Engineering course. The goal was to go through all key stages of the software development lifecycle:
 
 - Concept design  
